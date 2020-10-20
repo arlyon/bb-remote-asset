@@ -1,11 +1,11 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "go_default_library",
     srcs = [
         "action_caching_pusher.go",
-        "local_caching_pusher.go",
         "error_pusher.go",
+        "local_caching_pusher.go",
         "logging_pusher.go",
         "validating_pusher.go",
     ],
@@ -14,8 +14,8 @@ go_library(
     deps = [
         "//pkg/storage:go_default_library",
         "//pkg/translator:go_default_library",
-        "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:go_default_library",
         "@com_github_bazelbuild_remote_apis//build/bazel/remote/asset/v1:go_default_library",
+        "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:go_default_library",
         "@com_github_buildbarn_bb_storage//pkg/digest:go_default_library",
         "@com_github_buildbarn_bb_storage//pkg/util:go_default_library",
         "@com_github_golang_protobuf//proto:go_default_library",

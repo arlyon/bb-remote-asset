@@ -7,6 +7,7 @@ go_library(
         "error_fetcher.go",
         "fetcher.go",
         "http_fetcher.go",
+        "fetching_fetcher.go",
         "local_caching_fetcher.go",
         "logging_fetcher.go",
         "validating_fetcher.go",

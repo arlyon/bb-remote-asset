@@ -3,6 +3,7 @@ module github.com/buildbarn/bb-remote-asset
 go 1.13
 
 require (
+	github.com/bazelbuild/buildtools v0.0.0-20200925145723-e6efbf6df90b // indirect
 	github.com/bazelbuild/remote-apis v0.0.0-20200730154707-006a399149dd
 	github.com/buildbarn/bb-storage v0.0.0-20200802055539-f0281e269c07
 	github.com/golang/mock v1.4.4-0.20200406172829-6d816de489c1
