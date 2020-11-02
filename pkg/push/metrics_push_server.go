@@ -29,13 +29,19 @@ var (
 		prometheus.HistogramOpts{
 			Namespace: "buildbarn",
 			Subsystem: "push_server",
-			Name:      "blob_access_duration_seconds",
+			Name:      "push_server_duration_seconds",
 			Help:      "Amount of time spent per operation on pushing remote assets, in seconds.",
 			Buckets:   util.DecimalExponentialBuckets(-3, 6, 2),
 		},
 		[]string{"name", "operation", "grpc_code"})
-
-	// todo(arlyon): directory size?
+	pushServerOperationsQualifiers = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Namespace: "buildbarn",
+			Subsystem: "push_server",
+			Name:      "push_server_qualifiers",
+			Help:      "The qualifiers used in a given request.",
+		},
+		[]string{"name", "operation", "grpc_code"})
 )
 
 type metricsAssetPushServer struct {
@@ -45,6 +51,8 @@ type metricsAssetPushServer struct {
 	pushBlobBlobSizeBytes        prometheus.Observer
 	pushBlobDurationSeconds      prometheus.ObserverVec
 	pushDirectoryDurationSeconds prometheus.ObserverVec
+	pushBlobQualifiers           prometheus.ObserverVec
+	pushDirectoryQualifiers      prometheus.ObserverVec
 }
 
 // NewMetricsAssetPushServer wraps the PushServer to
@@ -62,6 +70,8 @@ func NewMetricsAssetPushServer(ps remoteasset.PushServer, clock clock.Clock, nam
 		pushBlobBlobSizeBytes:        pushServerOperationsBlobSizeBytes.WithLabelValues(name, "PushBlob"),
 		pushBlobDurationSeconds:      pushServerOperationsDurationSeconds.MustCurryWith(map[string]string{"name": name, "operation": "PushBlob"}),
 		pushDirectoryDurationSeconds: pushServerOperationsDurationSeconds.MustCurryWith(map[string]string{"name": name, "operation": "PushDirectory"}),
+		pushBlobQualifiers:           pushServerOperationsQualifiers.MustCurryWith(map[string]string{"name": name, "operation": "PushBlob"}),
+		pushDirectoryQualifiers:      pushServerOperationsQualifiers.MustCurryWith(map[string]string{"name": name, "operation": "PushDirectory"}),
 	}
 }
 
@@ -76,6 +86,9 @@ func (s *metricsAssetPushServer) PushBlob(ctx context.Context, req *remoteasset.
 	timeStart := s.clock.Now()
 	resp, err := s.pushServer.PushBlob(ctx, req)
 	s.updateDurationSeconds(s.pushBlobDurationSeconds, status.Code(err), timeStart)
+	for _, q := range req.Qualifiers {
+		s.pushBlobQualifiers.WithLabelValues(status.Code(err).String()).Observe(q)
+	}
 	return resp, err
 }
 
